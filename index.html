@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kolejka — Pierogarnie Stary Młyn</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brown-dark:  #2c1a0e;
+    --brown-mid:   #5c3520;
+    --brown-warm:  #8b5e3c;
+    --sand:        #c9a97a;
+    --sand-light:  #e8d5b7;
+    --cream:       #f7f0e3;
+    --cream-dark:  #ede0c8;
+    --white:       #fdfaf5;
+    --green:       #3a6b4a;
+    --green-light: #5a9a6a;
+    --rust:        #9b3a1e;
+    --shadow:      rgba(44,26,14,.15);
+    --radius:      4px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Lato', sans-serif; background: var(--cream); color: var(--brown-dark); min-height: 100vh; }
+
+  /* HEADER */
+  header { background: var(--brown-dark); position: sticky; top: 0; z-index: 100; box-shadow: 0 3px 20px rgba(0,0,0,.4); }
+  .header-stripe { height: 3px; background: linear-gradient(90deg, var(--brown-dark), var(--sand), var(--brown-warm), var(--sand), var(--brown-dark)); }
+  .header-top { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; }
+  .logo-area { display: flex; align-items: center; gap: 10px; }
+  .logo-icon { width: 40px; height: 40px; background: var(--sand); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+  .logo-text .top { font-family: 'Cormorant Garamond', serif; font-size: .95rem; font-weight: 400; color: var(--sand-light); letter-spacing: .12em; text-transform: uppercase; }
+  .logo-text .bottom { font-family: 'Cormorant Garamond', serif; font-size: 1.35rem; font-weight: 700; color: var(--white); letter-spacing: .04em; }
+
+  /* LANG PICKER in header */
+  .lang-picker { display: flex; gap: 4px; }
+  .lang-btn {
+    background: transparent;
+    border: 1.5px solid rgba(255,255,255,.2);
+    color: var(--sand-light);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: .8rem;
+    cursor: pointer;
+    transition: all .15s;
+    font-family: 'Lato', sans-serif;
+  }
+  .lang-btn.active, .lang-btn:hover { background: var(--sand); border-color: var(--sand); color: var(--brown-dark); font-weight: 700; }
+
+  .nav-tabs { display: flex; border-top: 1px solid rgba(255,255,255,.08); }
+  .nav-tabs button { flex: 1; background: transparent; border: none; color: var(--sand-light); padding: 9px 0; font-family: 'Lato', sans-serif; font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; transition: all .2s; border-bottom: 3px solid transparent; }
+  .nav-tabs button.active, .nav-tabs button:hover { color: var(--sand); border-bottom-color: var(--sand); background: rgba(201,169,122,.08); }
+
+  /* PAGES */
+  .page { display: none; padding: 20px 16px 60px; max-width: 580px; margin: 0 auto; }
+  .page.active { display: block; }
+
+  /* SECTION TITLE */
+  .section-title { text-align: center; margin-bottom: 20px; margin-top: 16px; }
+  .section-title h1 { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 600; color: var(--brown-dark); line-height: 1.2; }
+  .section-title h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 600; color: var(--brown-dark); }
+  .section-title p { color: var(--brown-warm); font-size: .9rem; margin-top: 6px; line-height: 1.6; }
+  .deco-line { display: flex; align-items: center; gap: 10px; justify-content: center; margin: 8px 0; }
+  .deco-line::before, .deco-line::after { content: ''; height: 1px; width: 44px; background: var(--sand); }
+  .deco-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--sand); }
+
+  /* CARD */
+  .card { background: var(--white); border-radius: var(--radius); padding: 20px; box-shadow: 0 2px 20px var(--shadow); margin-bottom: 16px; border: 1px solid var(--cream-dark); position: relative; }
+  .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--brown-warm), var(--sand), var(--brown-warm)); border-radius: var(--radius) var(--radius) 0 0; }
+
+  /* FORM */
+  label { display: block; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--brown-warm); margin-bottom: 5px; margin-top: 16px; }
+  input[type=text], input[type=tel], select, textarea {
+    width: 100%; padding: 10px 13px; border: 1.5px solid var(--cream-dark); border-radius: var(--radius);
+    font-family: 'Lato', sans-serif; font-size: .92rem; background: var(--cream); color: var(--brown-dark);
+    transition: border-color .2s, box-shadow .2s; outline: none; appearance: none;
+  }
+  textarea { resize: vertical; min-height: 72px; line-height: 1.5; }
+  input:focus, select:focus, textarea:focus { border-color: var(--sand); box-shadow: 0 0 0 3px rgba(201,169,122,.2); }
+  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%238b5e3c'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 34px; }
+
+  /* BUTTONS */
+  .btn { display: block; width: 100%; padding: 12px 18px; border: none; border-radius: var(--radius); font-family: 'Lato', sans-serif; font-size: .85rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; transition: all .2s; margin-top: 16px; }
+  .btn-primary { background: var(--brown-dark); color: var(--sand-light); }
+  .btn-primary:hover { background: var(--brown-mid); transform: translateY(-1px); box-shadow: 0 4px 16px var(--shadow); }
+  .btn-success { background: var(--green); color: #fff; }
+  .btn-success:hover { background: var(--green-light); }
+  .btn-danger { background: var(--rust); color: #fff; margin-top: 8px; }
+  .btn-danger:hover { opacity: .85; }
+  .btn-outline { background: transparent; border: 1.5px solid var(--sand); color: var(--brown-mid); }
+  .btn-outline:hover { background: var(--cream-dark); }
+  .btn-sm { display: inline-block; width: auto; padding: 5px 12px; font-size: .72rem; margin-top: 0; border-radius: var(--radius); }
+
+  /* STATUS BOX */
+  .status-box { border-radius: var(--radius); padding: 28px 20px; text-align: center; margin-bottom: 16px; border: 1.5px solid var(--sand); background: linear-gradient(160deg, var(--white) 0%, var(--cream) 100%); position: relative; overflow: hidden; }
+  .status-box::before { content: '🥟'; position: absolute; font-size: 7rem; opacity: .04; bottom: -20px; right: -10px; transform: rotate(-15deg); }
+  .status-ready { border-color: var(--green); background: linear-gradient(160deg, #f0faf5, #e0f5ea); animation: pulse-green 2s ease-in-out infinite; }
+  @keyframes pulse-green { 0%,100% { box-shadow: 0 0 0 0 rgba(58,107,74,.25); } 50% { box-shadow: 0 0 0 10px rgba(58,107,74,0); } }
+  .status-number { font-family: 'Cormorant Garamond', serif; font-size: 5rem; font-weight: 700; line-height: 1; color: var(--sand); }
+  .status-ready .status-number { color: var(--green); }
+  .status-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--brown-warm); margin-top: 2px; margin-bottom: 10px; }
+  .status-msg { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-style: italic; color: var(--brown-mid); line-height: 1.5; }
+  .status-ready .status-msg { color: var(--green); font-weight: 600; font-style: normal; font-size: 1.3rem; }
+  .queue-badge { display: inline-block; background: var(--sand); color: var(--brown-dark); font-weight: 700; font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; padding: 4px 14px; border-radius: 99px; margin-top: 10px; }
+
+  /* QUEUE LIST */
+  .queue-list { display: flex; flex-direction: column; gap: 10px; }
+  .queue-item { display: flex; align-items: center; gap: 12px; background: var(--white); border-radius: var(--radius); padding: 12px 14px; box-shadow: 0 1px 8px var(--shadow); border: 1px solid var(--cream-dark); border-left: 4px solid var(--sand); transition: all .2s; }
+  .queue-item.ready { border-left-color: var(--green); background: #f5fdf8; }
+  .q-num { background: var(--brown-dark); color: var(--sand); font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 700; width: 40px; height: 40px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .queue-item.ready .q-num { background: var(--green); color: #fff; }
+  .q-info { flex: 1; min-width: 0; }
+  .q-name { font-weight: 700; font-size: .92rem; }
+  .q-meta { font-size: .75rem; color: var(--brown-warm); margin-top: 2px; }
+  .q-lang-flag { font-size: .9rem; }
+  .q-actions { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; }
+
+  /* STATS */
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .stat { background: var(--white); border-radius: var(--radius); padding: 14px; text-align: center; box-shadow: 0 1px 8px var(--shadow); border: 1px solid var(--cream-dark); }
+  .stat-val { font-family: 'Cormorant Garamond', serif; font-size: 2.4rem; font-weight: 700; color: var(--sand); line-height: 1; }
+  .stat-lbl { font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: var(--brown-warm); margin-top: 4px; }
+
+  /* BADGES */
+  .badge { display: inline-block; padding: 2px 7px; border-radius: 99px; font-size: .68rem; font-weight: 700; background: var(--cream-dark); color: var(--brown-mid); }
+  .badge-green { background: #d4f0e0; color: var(--green); }
+
+  /* HINT */
+  .hint-box { background: var(--cream-dark); border-radius: var(--radius); padding: 12px 14px; font-size: .82rem; line-height: 1.6; color: var(--brown-mid); border-left: 3px solid var(--sand); margin-bottom: 14px; }
+  .hint-box code { background: var(--brown-dark); color: var(--sand); padding: 2px 6px; border-radius: 3px; font-size: .75rem; word-break: break-all; }
+
+  /* SMS LANG TABS */
+  .sms-lang-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; margin-top: 8px; }
+  .sms-tab { background: var(--cream); border: 1.5px solid var(--cream-dark); color: var(--brown-warm); padding: 5px 12px; border-radius: 99px; font-size: .78rem; font-weight: 700; cursor: pointer; transition: all .15s; }
+  .sms-tab.active { background: var(--brown-dark); border-color: var(--brown-dark); color: var(--sand); }
+  .sms-tab:hover:not(.active) { border-color: var(--sand); color: var(--brown-dark); }
+  .sms-editor { display: none; }
+  .sms-editor.active { display: block; }
+  .char-count { font-size: .72rem; color: var(--brown-warm); text-align: right; margin-top: 4px; }
+  .char-count.warn { color: var(--rust); }
+  .var-hint { font-size: .75rem; color: var(--brown-warm); margin-top: 6px; }
+  .var-hint code { background: var(--cream-dark); color: var(--brown-dark); padding: 1px 5px; border-radius: 3px; font-size: .7rem; }
+
+  hr { border: none; border-top: 1px solid var(--cream-dark); margin: 16px 0; }
+
+  /* TOAST */
+  #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--brown-dark); color: var(--sand-light); padding: 10px 20px; border-radius: 99px; font-size: .83rem; font-weight: 600; z-index: 999; transition: transform .3s cubic-bezier(.34,1.56,.64,1); white-space: nowrap; border: 1px solid var(--sand); box-shadow: 0 4px 20px rgba(0,0,0,.3); }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+
+  .empty { text-align: center; padding: 36px 20px; }
+  .empty-icon { font-size: 2.8rem; margin-bottom: 8px; }
+  .empty-text { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; font-style: italic; color: var(--brown-warm); }
+  .page-footer { text-align: center; padding: 14px 0 0; font-size: .72rem; color: var(--brown-warm); letter-spacing: .06em; }
+  .info-row { font-size: .86rem; color: var(--brown-mid); line-height: 1.8; }
+  .info-row strong { color: var(--brown-dark); }
+  .refresh-note { font-size: .73rem; color: var(--sand); text-align: center; margin-top: 8px; font-style: italic; }
+
+  @media (max-width: 380px) {
+    .logo-text .bottom { font-size: 1.15rem; }
+    .section-title h1 { font-size: 1.7rem; }
+    .status-number { font-size: 4rem; }
+    .lang-btn { padding: 3px 6px; font-size: .72rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-stripe"></div>
+  <div class="header-top">
+    <div class="logo-area">
+      <div class="logo-icon">🥟</div>
+      <div class="logo-text">
+        <div class="top">Pierogarnie</div>
+        <div class="bottom">Stary Młyn</div>
+      </div>
+    </div>
+    <div class="lang-picker" id="lang-picker">
+      <button class="lang-btn active" onclick="setLang('pl')">🇵🇱 PL</button>
+      <button class="lang-btn" onclick="setLang('en')">🇬🇧 EN</button>
+      <button class="lang-btn" onclick="setLang('de')">🇩🇪 DE</button>
+      <button class="lang-btn" onclick="setLang('uk')">🇺🇦 UA</button>
+    </div>
+  </div>
+  <div class="nav-tabs">
+    <button id="btn-guest" class="active" onclick="showPage('guest')" id="nav-guest-btn"></button>
+    <button id="btn-staff" onclick="showPage('staff')" id="nav-staff-btn"></button>
+  </div>
+</header>
+
+<!-- ══════ GOŚĆ ══════ -->
+<div id="page-guest" class="page active">
+  <div id="guest-form-section">
+    <div class="section-title">
+      <h1 id="ui-title"></h1>
+      <div class="deco-line"><div class="deco-dot"></div></div>
+      <p id="ui-subtitle"></p>
+    </div>
+    <div class="card">
+      <label id="lbl-name"></label>
+      <input type="text" id="g-name" maxlength="40">
+      <label id="lbl-phone"></label>
+      <input type="tel" id="g-phone" maxlength="15">
+      <label id="lbl-size"></label>
+      <select id="g-size"></select>
+      <button class="btn btn-primary" id="btn-join" onclick="joinQueue()"></button>
+    </div>
+    <div class="page-footer">Pierogarnie Stary Młyn © 2025</div>
+  </div>
+
+  <div id="guest-status-section" style="display:none">
+    <div id="status-box" class="status-box">
+      <div class="status-number" id="s-pos">—</div>
+      <div class="status-label" id="s-label"></div>
+      <div class="status-msg" id="s-msg"></div>
+      <div id="s-queue-tag" class="queue-badge" style="display:none"></div>
+    </div>
+    <div class="card">
+      <div class="info-row">
+        <strong id="s-greeting"></strong><br>
+        <span id="lbl-token-info"></span>: <strong id="s-token" style="color:var(--sand)"></strong><br>
+        <span id="lbl-phone-info"></span>: <span id="s-phone-display"></span>
+      </div>
+      <p class="refresh-note" id="ui-refresh-note"></p>
+      <button class="btn btn-primary" style="margin-top:12px" id="btn-check" onclick="refreshStatus()"></button>
+      <button class="btn btn-outline" style="margin-top:8px" id="btn-leave" onclick="leaveQueue()"></button>
+    </div>
+    <div class="page-footer">Pierogarnie Stary Młyn © 2025</div>
+  </div>
+</div>
+
+<!-- ══════ OBSŁUGA ══════ -->
+<div id="page-staff" class="page">
+  <div id="staff-login">
+    <div class="section-title">
+      <h2>Panel Obsługi</h2>
+      <div class="deco-line"><div class="deco-dot"></div></div>
+    </div>
+    <div class="card">
+      <label>PIN dostępu</label>
+      <input type="tel" id="staff-pin" placeholder="••••" maxlength="6" onkeydown="if(event.key==='Enter')staffLogin()">
+      <button class="btn btn-primary" onclick="staffLogin()">Zaloguj</button>
+      <p style="font-size:.76rem;color:var(--brown-warm);margin-top:10px;text-align:center">Domyślny PIN: <strong>1234</strong></p>
+    </div>
+  </div>
+
+  <div id="staff-panel" style="display:none">
+    <div class="stats">
+      <div class="stat"><div class="stat-val" id="stat-waiting">0</div><div class="stat-lbl">W kolejce</div></div>
+      <div class="stat"><div class="stat-val" id="stat-ready">0</div><div class="stat-lbl">Gotowych</div></div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:600">Aktualna kolejka</div>
+      <button class="btn btn-outline btn-sm" onclick="refreshStaff()">↻ Odśwież</button>
+    </div>
+    <div class="queue-list" id="staff-queue-list"></div>
+
+    <hr>
+
+    <!-- USTAWIENIA -->
+    <div class="card">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:600;margin-bottom:12px">Ustawienia ogólne</div>
+      <label>Nazwa lokalu</label>
+      <input type="text" id="set-name" placeholder="np. Pierogarnie Stary Młyn — Gdańsk">
+      <label>Zmień PIN</label>
+      <input type="tel" id="set-pin" placeholder="Nowy PIN (4–6 cyfr)" maxlength="6">
+    </div>
+
+    <!-- SMS -->
+    <div class="card">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:600;margin-bottom:4px">SMS — SMSAPI.pl</div>
+      <div class="hint-box">
+        Token SMS jest skonfigurowany na serwerze. Ustaw tylko nazwę nadawcy — musi być zatwierdzona w panelu SMSAPI.
+      </div>
+      <label>Nazwa nadawcy (max 11 znaków)</label>
+      <input type="text" id="set-smssender" placeholder="StaryMlyn" maxlength="11">
+      <div id="sms-status" style="font-size:.78rem;margin-top:6px;display:none"></div>
+    </div>
+
+    <!-- SZABLONY SMS -->
+    <div class="card">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:600;margin-bottom:6px">Szablony wiadomości SMS</div>
+      <div class="hint-box">
+        Dostosuj treść SMS-a dla każdego języka. Użyj zmiennych:<br>
+        <span class="var-hint"><code>{imie}</code> — imię gościa &nbsp; <code>{lokal}</code> — nazwa restauracji</span>
+      </div>
+
+      <div class="sms-lang-tabs" id="sms-lang-tabs">
+        <button class="sms-tab active" onclick="switchSmsTab('pl')">🇵🇱 Polski</button>
+        <button class="sms-tab" onclick="switchSmsTab('en')">🇬🇧 English</button>
+        <button class="sms-tab" onclick="switchSmsTab('de')">🇩🇪 Deutsch</button>
+        <button class="sms-tab" onclick="switchSmsTab('uk')">🇺🇦 Українська</button>
+      </div>
+
+      <div id="sms-editor-pl" class="sms-editor active">
+        <label>Treść SMS — Polski</label>
+        <textarea id="sms-tpl-pl" oninput="updateCharCount('pl')"></textarea>
+        <div class="char-count" id="cc-pl"></div>
+      </div>
+      <div id="sms-editor-en" class="sms-editor">
+        <label>SMS content — English</label>
+        <textarea id="sms-tpl-en" oninput="updateCharCount('en')"></textarea>
+        <div class="char-count" id="cc-en"></div>
+      </div>
+      <div id="sms-editor-de" class="sms-editor">
+        <label>SMS-Inhalt — Deutsch</label>
+        <textarea id="sms-tpl-de" oninput="updateCharCount('de')"></textarea>
+        <div class="char-count" id="cc-de"></div>
+      </div>
+      <div id="sms-editor-uk" class="sms-editor">
+        <label>Текст SMS — Українська</label>
+        <textarea id="sms-tpl-uk" oninput="updateCharCount('uk')"></textarea>
+        <div class="char-count" id="cc-uk"></div>
+      </div>
+
+      <button class="btn btn-outline btn-sm" style="margin-top:12px;width:auto" onclick="resetSmsTemplates()">↺ Przywróć domyślne</button>
+    </div>
+
+    <div class="card">
+      <button class="btn btn-primary" onclick="saveSettings()">Zapisz wszystkie ustawienia</button>
+      <button class="btn btn-danger" onclick="clearAll()">Wyczyść całą kolejkę</button>
+    </div>
+
+    <div class="hint-box">
+      <strong>🔗 Link dla gości (QR):</strong><br>
+      <code id="guest-url"></code>
+    </div>
+
+    <button class="btn btn-outline" onclick="staffLogout()">Wyloguj</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// TŁUMACZENIA UI
+// ══════════════════════════════════════════════════════
+const UI = {
+  pl: {
+    navGuest: 'Kolejka — Gość',
+    navStaff: 'Panel Obsługi',
+    title: 'Zarezerwuj miejsce\nw kolejce',
+    subtitle: 'Wpisz swoje dane — wyślemy SMS gdy stolik będzie gotowy.',
+    lblName: 'Imię',
+    lblPhone: 'Numer telefonu',
+    lblSize: 'Liczba osób',
+    namePh: 'np. Anna',
+    phonePh: 'np. 600 123 456',
+    btnJoin: 'Dołącz do kolejki',
+    btnCheck: 'Sprawdź status',
+    btnLeave: 'Zrezygnuj z kolejki',
+    statusLabel: 'Twoja pozycja w kolejce',
+    msgReady: 'Twój stolik jest gotowy! Zapraszamy do środka.',
+    msgSeated: 'Zostałeś posadzony. Smacznego!',
+    msgNext: 'Jesteś następny! Przygotuj się.',
+    msgWaiting: 'Chwilkę cierpliwości, przygotowujemy stolik…',
+    badgeBefore1: '1 osoba przed Tobą',
+    badgeBeforeN: (n) => `${n} osoby przed Tobą`,
+    greeting: (name) => `Cześć, ${name}!`,
+    lblTokenInfo: 'Numer kolejkowy',
+    lblPhoneInfo: 'Telefon',
+    refreshNote: '↻ Odśwież stronę lub kliknij przycisk, aby sprawdzić aktualny status',
+    toastJoined: 'Dołączyłeś do kolejki!',
+    toastLeft: 'Usunięto z kolejki',
+    toastRefreshed: 'Status zaktualizowany',
+    toastNotFound: 'Nie znaleziono wpisu',
+    sizes: ['1 osoba','2 osoby','3 osoby','4 osoby','5 osób','6+ osób'],
+  },
+  en: {
+    navGuest: 'Queue — Guest',
+    navStaff: 'Staff Panel',
+    title: 'Join the\nwaiting list',
+    subtitle: 'Enter your details — we\'ll text you when your table is ready.',
+    lblName: 'Your name',
+    lblPhone: 'Phone number',
+    lblSize: 'Party size',
+    namePh: 'e.g. Anna',
+    phonePh: 'e.g. +48 600 123 456',
+    btnJoin: 'Join the queue',
+    btnCheck: 'Check status',
+    btnLeave: 'Leave the queue',
+    statusLabel: 'Your position',
+    msgReady: 'Your table is ready! Please come inside.',
+    msgSeated: 'You have been seated. Enjoy your meal!',
+    msgNext: 'You\'re next! Please get ready.',
+    msgWaiting: 'Please wait a moment, we\'re preparing your table…',
+    badgeBefore1: '1 person ahead of you',
+    badgeBeforeN: (n) => `${n} people ahead of you`,
+    greeting: (name) => `Hi, ${name}!`,
+    lblTokenInfo: 'Queue number',
+    lblPhoneInfo: 'Phone',
+    refreshNote: '↻ Refresh the page or tap the button to check your status',
+    toastJoined: 'You joined the queue!',
+    toastLeft: 'Removed from queue',
+    toastRefreshed: 'Status updated',
+    toastNotFound: 'Entry not found',
+    sizes: ['1 person','2 people','3 people','4 people','5 people','6+ people'],
+  },
+  de: {
+    navGuest: 'Warteschlange',
+    navStaff: 'Personal',
+    title: 'In die Warteschlange\neintragen',
+    subtitle: 'Geben Sie Ihre Daten ein — wir schicken Ihnen eine SMS, wenn Ihr Tisch frei ist.',
+    lblName: 'Ihr Name',
+    lblPhone: 'Telefonnummer',
+    lblSize: 'Personenanzahl',
+    namePh: 'z.B. Anna',
+    phonePh: 'z.B. +48 600 123 456',
+    btnJoin: 'In die Warteschlange',
+    btnCheck: 'Status prüfen',
+    btnLeave: 'Warteschlange verlassen',
+    statusLabel: 'Ihre Position',
+    msgReady: 'Ihr Tisch ist bereit! Herzlich willkommen.',
+    msgSeated: 'Sie wurden platziert. Guten Appetit!',
+    msgNext: 'Sie sind als Nächstes dran! Bitte machen Sie sich bereit.',
+    msgWaiting: 'Einen Moment bitte, wir bereiten Ihren Tisch vor…',
+    badgeBefore1: '1 Person vor Ihnen',
+    badgeBeforeN: (n) => `${n} Personen vor Ihnen`,
+    greeting: (name) => `Hallo, ${name}!`,
+    lblTokenInfo: 'Warteschlangennummer',
+    lblPhoneInfo: 'Telefon',
+    refreshNote: '↻ Seite neu laden oder Schaltfläche drücken, um den Status zu prüfen',
+    toastJoined: 'Sie sind in der Warteschlange!',
+    toastLeft: 'Aus der Warteschlange entfernt',
+    toastRefreshed: 'Status aktualisiert',
+    toastNotFound: 'Eintrag nicht gefunden',
+    sizes: ['1 Person','2 Personen','3 Personen','4 Personen','5 Personen','6+ Personen'],
+  },
+  uk: {
+    navGuest: 'Черга — Гість',
+    navStaff: 'Панель персоналу',
+    title: 'Зайняти місце\nв черзі',
+    subtitle: 'Введіть свої дані — надішлемо SMS, коли столик буде готовий.',
+    lblName: 'Ваше ім\'я',
+    lblPhone: 'Номер телефону',
+    lblSize: 'Кількість осіб',
+    namePh: 'напр. Анна',
+    phonePh: 'напр. +48 600 123 456',
+    btnJoin: 'Стати в чергу',
+    btnCheck: 'Перевірити статус',
+    btnLeave: 'Вийти з черги',
+    statusLabel: 'Ваша позиція в черзі',
+    msgReady: 'Ваш столик готовий! Запрошуємо всередину.',
+    msgSeated: 'Вас посадили. Смачного!',
+    msgNext: 'Ви наступний! Будьте готові.',
+    msgWaiting: 'Зачекайте хвилинку, готуємо ваш столик…',
+    badgeBefore1: '1 особа перед вами',
+    badgeBeforeN: (n) => `${n} особи перед вами`,
+    greeting: (name) => `Привіт, ${name}!`,
+    lblTokenInfo: 'Номер черги',
+    lblPhoneInfo: 'Телефон',
+    refreshNote: '↻ Оновіть сторінку або натисніть кнопку, щоб перевірити статус',
+    toastJoined: 'Ви в черзі!',
+    toastLeft: 'Видалено з черги',
+    toastRefreshed: 'Статус оновлено',
+    toastNotFound: 'Запис не знайдено',
+    sizes: ['1 особа','2 особи','3 особи','4 особи','5 осіб','6+ осіб'],
+  },
+};
+
+// Domyślne szablony SMS
+const DEFAULT_SMS = {
+  pl: 'Cześć {imie}! Twój stolik w {lokal} jest gotowy. Zapraszamy! 🥟',
+  en: 'Hi {imie}! Your table at {lokal} is ready. Please come in! 🥟',
+  de: 'Hallo {imie}! Ihr Tisch im {lokal} ist bereit. Herzlich willkommen! 🥟',
+  uk: 'Привіт {imie}! Ваш столик у {lokal} готовий. Запрошуємо! 🥟',
+};
+
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+let currentLang = 'pl';
+
+const LS = {
+  get: k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set: (k,v) => localStorage.setItem(k, JSON.stringify(v)),
+};
+function getQueue()    { return LS.get('queue')    || []; }
+function setQueue(q)   { LS.set('queue', q); }
+function getSettings() {
+  return LS.get('settings') || {
+    name: 'Pierogarnie Stary Młyn', pin: '1234',
+    smsSender: 'StaryMlyn',
+    smsTemplates: { ...DEFAULT_SMS },
+  };
+}
+function saveSett(s) { LS.set('settings', s); }
+
+// ══════════════════════════════════════════════════════
+// LANGUAGE
+// ══════════════════════════════════════════════════════
+function setLang(lang) {
+  currentLang = lang;
+  LS.set('guest_lang', lang);
+
+  // update nav buttons
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.lang-btn[onclick="setLang('${lang}')"]`).classList.add('active');
+
+  applyUI();
+
+  // re-render status if showing
+  const token = LS.get('my_token');
+  if (token && document.getElementById('guest-status-section').style.display !== 'none') {
+    renderGuestStatus(token);
+  }
+}
+
+function applyUI() {
+  const t = UI[currentLang];
+  const h1 = document.getElementById('ui-title');
+  h1.innerHTML = t.title.replace('\n', '<br>');
+
+  document.getElementById('ui-subtitle').textContent    = t.subtitle;
+  document.getElementById('lbl-name').textContent       = t.lblName;
+  document.getElementById('lbl-phone').textContent      = t.lblPhone;
+  document.getElementById('lbl-size').textContent       = t.lblSize;
+  document.getElementById('g-name').placeholder         = t.namePh;
+  document.getElementById('g-phone').placeholder        = t.phonePh;
+  document.getElementById('btn-join').textContent       = t.btnJoin;
+  document.getElementById('btn-check').textContent      = t.btnCheck;
+  document.getElementById('btn-leave').textContent      = t.btnLeave;
+  document.getElementById('s-label').textContent        = t.statusLabel;
+  document.getElementById('lbl-token-info').textContent = t.lblTokenInfo;
+  document.getElementById('lbl-phone-info').textContent = t.lblPhoneInfo;
+  document.getElementById('ui-refresh-note').textContent= t.refreshNote;
+  document.getElementById('btn-guest').textContent      = t.navGuest;
+  document.getElementById('btn-staff').textContent      = t.navStaff;
+
+  // rebuild size select
+  const sel = document.getElementById('g-size');
+  const cur = sel.value;
+  sel.innerHTML = t.sizes.map((s,i) => `<option value="${i+1}">${s}</option>`).join('');
+  if (cur) sel.value = cur;
+}
+
+// ══════════════════════════════════════════════════════
+// PAGES
+// ══════════════════════════════════════════════════════
+function showPage(p) {
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-tabs button').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-' + p).classList.add('active');
+  document.getElementById('btn-' + p).classList.add('active');
+  if (p === 'staff') renderStaff();
+}
+
+// ══════════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════════
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ══════════════════════════════════════════════════════
+// GUEST
+// ══════════════════════════════════════════════════════
+function joinQueue() {
+  const t     = UI[currentLang];
+  const name  = document.getElementById('g-name').value.trim();
+  const phone = document.getElementById('g-phone').value.trim();
+  const size  = document.getElementById('g-size').value;
+  if (!name)  { toast(t.lblName + '?'); return; }
+  if (!phone) { toast(t.lblPhone + '?'); return; }
+
+  const queue = getQueue();
+  const token = Date.now().toString(36).toUpperCase().slice(-5);
+  queue.push({ id: token, name, phone, size: parseInt(size), joinedAt: Date.now(), status: 'waiting', lang: currentLang });
+  setQueue(queue);
+  LS.set('my_token', token);
+
+  document.getElementById('guest-form-section').style.display   = 'none';
+  document.getElementById('guest-status-section').style.display = 'block';
+  renderGuestStatus(token);
+  toast(t.toastJoined);
+}
+
+function renderGuestStatus(token) {
+  const allQ  = getQueue();
+  const entry = allQ.find(e => e.id === token);
+  if (!entry) { toast(UI[currentLang].toastNotFound); resetGuestForm(); return; }
+
+  // use the lang the guest registered with
+  const lang = entry.lang || currentLang;
+  const t    = UI[lang];
+
+  const box   = document.getElementById('status-box');
+  const posEl = document.getElementById('s-pos');
+  const msgEl = document.getElementById('s-msg');
+  const tagEl = document.getElementById('s-queue-tag');
+
+  document.getElementById('s-greeting').textContent      = t.greeting(entry.name);
+  document.getElementById('s-token').textContent         = entry.id;
+  document.getElementById('s-phone-display').textContent = entry.phone;
+  document.getElementById('s-label').textContent         = t.statusLabel;
+  document.getElementById('btn-check').textContent       = t.btnCheck;
+  document.getElementById('btn-leave').textContent       = t.btnLeave;
+  document.getElementById('lbl-token-info').textContent  = t.lblTokenInfo;
+  document.getElementById('lbl-phone-info').textContent  = t.lblPhoneInfo;
+  document.getElementById('ui-refresh-note').textContent = t.refreshNote;
+
+  if (entry.status === 'ready') {
+    box.className = 'status-box status-ready';
+    posEl.textContent = '✓';
+    msgEl.textContent = t.msgReady;
+    tagEl.style.display = 'none';
+  } else if (entry.status === 'seated') {
+    posEl.textContent = '✓';
+    msgEl.textContent = t.msgSeated;
+    tagEl.style.display = 'none';
+  } else {
+    const active = allQ.filter(e => e.status === 'waiting' || e.status === 'ready');
+    const pos    = active.findIndex(e => e.id === token) + 1;
+    const before = pos - 1;
+    box.className = 'status-box';
+    posEl.textContent = pos || '—';
+    if (before === 0) {
+      msgEl.textContent = t.msgNext;
+      tagEl.style.display = 'none';
+    } else {
+      msgEl.textContent = t.msgWaiting;
+      tagEl.style.display = 'inline-block';
+      tagEl.textContent = before === 1 ? t.badgeBefore1 : t.badgeBeforeN(before);
+    }
+  }
+}
+
+function refreshStatus() {
+  const token = LS.get('my_token');
+  if (!token) { resetGuestForm(); return; }
+  renderGuestStatus(token);
+  toast(UI[currentLang].toastRefreshed);
+}
+
+function leaveQueue() {
+  const token = LS.get('my_token');
+  if (!token) return;
+  const queue = getQueue();
+  const idx = queue.findIndex(e => e.id === token);
+  if (idx !== -1) { queue[idx].status = 'left'; setQueue(queue); }
+  LS.set('my_token', null);
+  resetGuestForm();
+  toast(UI[currentLang].toastLeft);
+}
+
+function resetGuestForm() {
+  document.getElementById('guest-form-section').style.display   = 'block';
+  document.getElementById('guest-status-section').style.display = 'none';
+  document.getElementById('g-name').value  = '';
+  document.getElementById('g-phone').value = '';
+}
+
+function autoRestoreGuest() {
+  const savedLang = LS.get('guest_lang');
+  if (savedLang && UI[savedLang]) setLang(savedLang);
+
+  const token = LS.get('my_token');
+  if (!token) return;
+  const entry = getQueue().find(e => e.id === token);
+  if (!entry || entry.status === 'seated' || entry.status === 'left') return;
+  // restore lang from entry
+  if (entry.lang && UI[entry.lang]) setLang(entry.lang);
+  document.getElementById('guest-form-section').style.display   = 'none';
+  document.getElementById('guest-status-section').style.display = 'block';
+  renderGuestStatus(token);
+}
+
+// ══════════════════════════════════════════════════════
+// STAFF
+// ══════════════════════════════════════════════════════
+const FLAG = { pl:'🇵🇱', en:'🇬🇧', de:'🇩🇪', uk:'🇺🇦' };
+
+function staffLogin() {
+  const pin = document.getElementById('staff-pin').value;
+  const s   = getSettings();
+  if (pin === s.pin) {
+    document.getElementById('staff-login').style.display = 'none';
+    document.getElementById('staff-panel').style.display = 'block';
+    loadSettingsIntoForm();
+    renderStaff();
+  } else {
+    toast('Nieprawidłowy PIN');
+    document.getElementById('staff-pin').value = '';
+  }
+}
+
+function staffLogout() {
+  document.getElementById('staff-login').style.display = 'block';
+  document.getElementById('staff-panel').style.display = 'none';
+  document.getElementById('staff-pin').value = '';
+}
+
+function loadSettingsIntoForm() {
+  const s = getSettings();
+  document.getElementById('set-name').value      = s.name;
+  document.getElementById('set-smssender').value = s.smsSender || '';
+  document.getElementById('guest-url').textContent = window.location.href.split('?')[0];
+
+  const tpls = s.smsTemplates || DEFAULT_SMS;
+  ['pl','en','de','uk'].forEach(lang => {
+    const ta = document.getElementById('sms-tpl-' + lang);
+    ta.value = tpls[lang] || DEFAULT_SMS[lang];
+    updateCharCount(lang);
+  });
+}
+
+function renderStaff() {
+  if (document.getElementById('staff-panel').style.display === 'none') return;
+  const queue  = getQueue().filter(e => e.status !== 'seated' && e.status !== 'left');
+  const listEl = document.getElementById('staff-queue-list');
+
+  document.getElementById('stat-waiting').textContent = queue.filter(e => e.status === 'waiting').length;
+  document.getElementById('stat-ready').textContent   = queue.filter(e => e.status === 'ready').length;
+
+  if (queue.length === 0) {
+    listEl.innerHTML = '<div class="empty"><div class="empty-icon">🥟</div><div class="empty-text">Kolejka jest pusta</div></div>';
+    return;
+  }
+  listEl.innerHTML = queue.map((entry, idx) => {
+    const min   = Math.floor((Date.now() - entry.joinedAt) / 60000);
+    const when  = min < 1 ? 'przed chwilą' : min === 1 ? '1 min temu' : min + ' min temu';
+    const ready = entry.status === 'ready';
+    const flag  = FLAG[entry.lang] || '🏳';
+    return `
+      <div class="queue-item ${ready ? 'ready' : ''}">
+        <div class="q-num">${idx + 1}</div>
+        <div class="q-info">
+          <div class="q-name">${esc(entry.name)} <span class="badge">${entry.size} os.</span> <span class="q-lang-flag" title="Język: ${entry.lang||'?'}">${flag}</span>${ready ? ' <span class="badge badge-green">gotowy</span>' : ''}</div>
+          <div class="q-meta">📱 ${esc(entry.phone)} · #${entry.id} · ${when}</div>
+        </div>
+        <div class="q-actions">
+          ${!ready ? `<button class="btn btn-success btn-sm" onclick="markReady('${entry.id}')">Stolik wolny</button>` : ''}
+          ${ready  ? `<button class="btn btn-primary btn-sm" onclick="markSeated('${entry.id}')">Posadzono</button>` : ''}
+          <button class="btn btn-danger btn-sm" onclick="removeEntry('${entry.id}')">Usuń</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function refreshStaff() { renderStaff(); toast('Odświeżono'); }
+
+function markReady(id) {
+  const queue = getQueue();
+  const idx   = queue.findIndex(e => e.id === id);
+  if (idx !== -1) { queue[idx].status = 'ready'; setQueue(queue); }
+  renderStaff();
+  if (idx !== -1) sendSmsReady(queue[idx]);
+}
+
+function markSeated(id) {
+  const queue = getQueue();
+  const idx   = queue.findIndex(e => e.id === id);
+  if (idx !== -1) { queue[idx].status = 'seated'; setQueue(queue); }
+  renderStaff();
+  toast('Gość posadzony ✓');
+}
+
+function removeEntry(id) {
+  setQueue(getQueue().filter(e => e.id !== id));
+  renderStaff();
+  toast('Usunięto z kolejki');
+}
+
+// ══════════════════════════════════════════════════════
+// SETTINGS + SMS TEMPLATES
+// ══════════════════════════════════════════════════════
+function switchSmsTab(lang) {
+  document.querySelectorAll('.sms-tab').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.sms-tab[onclick="switchSmsTab('${lang}')"]`).classList.add('active');
+  document.querySelectorAll('.sms-editor').forEach(e => e.classList.remove('active'));
+  document.getElementById('sms-editor-' + lang).classList.add('active');
+}
+
+function updateCharCount(lang) {
+  const ta  = document.getElementById('sms-tpl-' + lang);
+  const cc  = document.getElementById('cc-' + lang);
+  const len = ta.value.length;
+  cc.textContent = `${len} znaków${len > 160 ? ' — SMS zostanie podzielony na ' + Math.ceil(len/153) + ' części' : ''}`;
+  cc.className   = 'char-count' + (len > 160 ? ' warn' : '');
+}
+
+function resetSmsTemplates() {
+  if (!confirm('Przywrócić domyślne szablony SMS dla wszystkich języków?')) return;
+  ['pl','en','de','uk'].forEach(lang => {
+    document.getElementById('sms-tpl-' + lang).value = DEFAULT_SMS[lang];
+    updateCharCount(lang);
+  });
+  toast('Przywrócono domyślne szablony');
+}
+
+function saveSettings() {
+  const s = getSettings();
+  s.name      = document.getElementById('set-name').value.trim() || 'Pierogarnie Stary Młyn';
+  s.smsSender = (document.getElementById('set-smssender').value.trim().replace(/\s/g,'') || 'StaryMlyn').slice(0,11);
+  const newPin = document.getElementById('set-pin').value.trim();
+  if (newPin.length >= 4) s.pin = newPin;
+
+  s.smsTemplates = {};
+  ['pl','en','de','uk'].forEach(lang => {
+    s.smsTemplates[lang] = document.getElementById('sms-tpl-' + lang).value.trim() || DEFAULT_SMS[lang];
+  });
+
+  saveSett(s);
+  document.getElementById('set-pin').value = '';
+
+  const statusEl = document.getElementById('sms-status');
+  statusEl.style.display = 'block';
+  statusEl.style.color   = 'var(--green)';
+  statusEl.textContent   = '✓ Ustawienia SMS zapisane';
+
+  toast('Ustawienia zapisane ✓');
+}
+
+function clearAll() {
+  if (!confirm('Na pewno wyczyścić całą kolejkę?')) return;
+  setQueue([]);
+  renderStaff();
+  toast('Kolejka wyczyszczona');
+}
+
+// ══════════════════════════════════════════════════════
+// SMS
+// ══════════════════════════════════════════════════════
+async function sendSmsReady(entry) {
+  const s    = getSettings();
+
+  const lang = entry.lang || 'pl';
+  const tpls = s.smsTemplates || DEFAULT_SMS;
+  const tpl  = tpls[lang] || DEFAULT_SMS[lang];
+  const msg  = tpl.replace(/{imie}/g, entry.name).replace(/{lokal}/g, s.name);
+
+  const phone = entry.phone.replace(/\s+/g,'').replace(/^0+/,'');
+  const norm  = phone.startsWith('+') ? phone.slice(1) : (phone.length === 9 ? '48' + phone : phone);
+
+  toast('Wysyłam SMS…');
+  try {
+    const res = await fetch('/.netlify/functions/send-sms', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to: norm, message: msg, from: s.smsSender }),
+    });
+    const data = await res.json();
+    if (data.count && data.count > 0) {
+      toast(`✓ SMS (${FLAG[lang]}) wysłany do ${entry.name}`);
+    } else {
+      const ERR = {8:'Błędny numer',13:'Brak środków',101:'Nieprawidłowy token',201:'Błędna nazwa nadawcy',301:'Błędny numer'};
+      toast('Błąd SMS: ' + (ERR[data.error] || 'kod ' + data.error));
+    }
+  } catch(e) {
+    toast('Błąd połączenia z SMSAPI');
+    console.error(e);
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// UTILS + INIT
+// ══════════════════════════════════════════════════════
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+applyUI();
+autoRestoreGuest();
+</script>
+</body>
+</html>
