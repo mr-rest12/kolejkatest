@@ -845,10 +845,10 @@ async function sendSmsReady(entry) {
 
   toast('Wysyłam SMS…');
   try {
-    const res = await fetch('https://api.smsapi.pl/sms.do', {
+    const res = await fetch('/.netlify/functions/send-sms', {
       method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + s.smsToken, 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({ to: norm, message: msg, from: s.smsSender, encoding: 'utf-8', format: 'json' }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: s.smsToken, to: norm, message: msg, from: s.smsSender }),
     });
     const data = await res.json();
     if (data.count && data.count > 0) {
